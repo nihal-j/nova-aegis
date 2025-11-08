@@ -64,20 +64,30 @@ Provide a concise, plain-English explanation of why this action was {'allowed' i
         status = risk_card.get("status", "unknown")
         diff = risk_card.get("diff", "")
         
-        # Summarize checks
-        passed = [name for name, ok, msg in checks if ok]
-        failed = [name for name, ok, msg in checks if not ok]
+        # Summarize checks with specific error messages
+        passed = [(name, msg) for name, ok, msg in checks if ok]
+        failed = [(name, msg) for name, ok, msg in checks if not ok]
         
         parts = []
         if status == "allow":
             parts.append("Action is safe")
+            if passed:
+                passed_names = [name for name, _ in passed]
+                parts.append(f"all checks passed: {', '.join(passed_names)}")
         else:
             parts.append("Action is blocked")
-        
-        if failed:
-            parts.append(f"due to failed checks: {', '.join(failed)}")
-        elif passed:
-            parts.append(f"all checks passed: {', '.join(passed)}")
+            if failed:
+                # Include specific error messages for failed checks
+                failure_details = []
+                for name, msg in failed:
+                    if msg and msg != "OK" and msg != "pytest passed":
+                        failure_details.append(f"{name}: {msg}")
+                    else:
+                        failure_details.append(f"{name} check failed")
+                if failure_details:
+                    parts.append("Reason: " + "; ".join(failure_details))
+                else:
+                    parts.append(f"due to failed checks: {', '.join([name for name, _ in failed])}")
         
         # Add diff summary if available
         if diff:

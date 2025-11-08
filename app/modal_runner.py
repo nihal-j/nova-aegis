@@ -9,6 +9,7 @@ Requires:
 - Modal package installed
 - Modal token configured (modal token set)
 - DEMO_REPO environment variable set
+- Modal app deployed (run: modal deploy app.modal_runner)
 
 See docs/WALKTHROUGH.md for Modal setup instructions.
 """

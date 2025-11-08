@@ -368,7 +368,7 @@ with tab1:
             "Use Modal cloud sandbox (requires DEMO_REPO & Modal token)",
             value=False,
             key="use_modal",
-            help="Run tests in Modal's cloud infrastructure instead of locally. Requires DEMO_REPO in .env and Modal token configured. Falls back to local if unavailable."
+            help="Run tests in Modal's cloud infrastructure instead of locally. Requires: 1) DEMO_REPO in .env, 2) Modal token (run 'modal token set'), 3) Modal app deployed (run 'modal deploy app.modal_runner'). Falls back to local if unavailable."
         )
         
         st.markdown("**Preview:**")

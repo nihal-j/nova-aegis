@@ -141,7 +141,13 @@ Key fields:
    echo "DEMO_REPO=https://github.com/nihal-j/aegis-demo.git" >> .env
    ```
 
-4. **Restart the API server** (Modal config is read at startup)
+4. **Deploy the Modal app** (required before first use):
+   ```bash
+   modal deploy app.modal_runner
+   ```
+   This deploys the Modal function to the cloud. You only need to do this once.
+
+5. **Restart the API server** (Modal config is read at startup)
 
 ### Toggle Modal in UI
 

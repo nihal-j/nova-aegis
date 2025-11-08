@@ -221,10 +221,19 @@ def propose(a: Action):
                 checks.append(("modal", False, "DEMO_REPO not configured"))
             else:
                 try:
+                    # Modal requires the app to be deployed first
+                    # Try to call remote function
                     res = modal_run.remote(DEMO_REPO, a.file_path, a.new_contents)
+                    checks.append(("modal", True, "Modal cloud sandbox executed successfully"))
                 except Exception as e:
                     error_msg = str(e)[:200]
-                    checks.append(("modal", False, f"Modal error: {error_msg}"))
+                    # Provide more helpful error message
+                    if "not found" in error_msg.lower() or "deploy" in error_msg.lower():
+                        checks.append(("modal", False, "Modal app not deployed. Run: modal deploy app.modal_runner"))
+                    elif "token" in error_msg.lower() or "auth" in error_msg.lower():
+                        checks.append(("modal", False, "Modal authentication failed. Run: modal token set"))
+                    else:
+                        checks.append(("modal", False, f"Modal error: {error_msg}"))
                     res = None
         
         # Fallback to local if Modal failed or not requested
