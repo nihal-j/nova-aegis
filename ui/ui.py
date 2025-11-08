@@ -482,7 +482,13 @@ with tab1:
             explanation = risk_card.get("explanation", "")
             if explanation:
                 st.markdown("#### 💡 Explanation")
-                st.caption("AI-generated or plain-English summary of why this action was allowed or blocked.")
+                # Check if OpenRouter was used (if we have the key, assume AI was attempted)
+                from app.secrets import read_openrouter_key
+                has_openrouter_key = read_openrouter_key() is not None
+                if has_openrouter_key:
+                    st.caption("🤖 AI-powered explanation (Claude 3.5 Sonnet) or plain-English summary")
+                else:
+                    st.caption("📝 Plain-English summary of why this action was allowed or blocked")
                 st.markdown(
                     f'<div class="explanation-box">{explanation}</div>',
                     unsafe_allow_html=True
