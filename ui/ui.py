@@ -725,6 +725,6 @@ def test_rollout_not_100_instantly():
 
 # Footer (outside tabs)
 st.markdown(
-    '<div class="footer">Aegis · CMU Nova 2025</div>',
+    '<div class="footer">Aegis · Nihal Josyula · CMU Nova 2025</div>',
     unsafe_allow_html=True
 )

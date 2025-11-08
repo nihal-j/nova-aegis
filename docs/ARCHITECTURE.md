@@ -120,7 +120,7 @@ A Risk Card is the core data structure returned by Aegis. Here's its schema:
     ["dry_run_tests", true, "pytest passed"]
   ],
   "risk_score": 10,
-  "explanation": "Action is safe. all checks passed: policy, dry_run_tests. (2 added, 0 removed)",
+  "explanation": "✅ This action is SAFE and has been ALLOWED. All safety checks passed: policy validation passed (file path allowed, intent is safe, content structure valid); all tests passed in sandbox. The change to 'config/app.yaml' was validated and is safe to apply. Change summary: 1 line(s) added, 1 line(s) removed.",
   "diff": "--- config/app.yaml\n+++ config/app.yaml\n@@ -1,3 +1,3 @@\n service: web\n-pagination: 20\n+pagination: 50\n featureX: false",
   "diff_analysis": {
     "lines_added": 1,
@@ -144,7 +144,7 @@ A Risk Card is the core data structure returned by Aegis. Here's its schema:
     ["policy", false, "Destructive intent blocked"]
   ],
   "risk_score": 70,
-  "explanation": "Action is blocked due to failed checks: policy",
+  "explanation": "⛔ This action is BLOCKED and cannot proceed. Reason: Policy violation: The intent 'delete table' contains 'delete', which is blocked by the destructive operation policy. This prevents accidental deletion of critical resources. The proposed change to 'config/app.yaml' cannot be applied due to the above safety violations.",
   "diff": "",
   "diff_analysis": {
     "lines_added": 0,
@@ -300,10 +300,10 @@ Score is capped at 100. Levels:
 
 Explanations are generated in `app/explain.py`:
 
-1. **If OpenRouter key exists**: Calls Claude 3.5 Sonnet with risk card summary
-2. **Otherwise**: Builds plain-English string from checks and diff
+1. **If OpenRouter key exists**: Calls Claude 3.5 Sonnet with comprehensive prompt including file path, intent, check results, and diff preview. Uses lower temperature (0.3) for consistent, factual explanations. Allows up to 500 tokens for detailed responses.
+2. **Otherwise**: Builds detailed plain-English string from checks and diff with specific error messages
 
-Both methods are capped at 280 characters and never crash (always return a string).
+Both methods are capped at 400 characters and never crash (always return a string). The fallback explanations now include specific details about which policy rule failed and why, making them much more informative for both users and AI agents.
 
 ## Next Steps
 
