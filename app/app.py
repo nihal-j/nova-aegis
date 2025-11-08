@@ -228,10 +228,13 @@ def propose(a: Action):
                 except Exception as e:
                     error_msg = str(e)[:200]
                     # Provide more helpful error message
-                    if "not found" in error_msg.lower() or "deploy" in error_msg.lower():
-                        checks.append(("modal", False, "Modal app not deployed. Run: modal deploy app.modal_runner"))
-                    elif "token" in error_msg.lower() or "auth" in error_msg.lower():
+                    error_lower = error_msg.lower()
+                    if "not found" in error_lower or "deploy" in error_lower or "hydrated" in error_lower or "not running" in error_lower:
+                        checks.append(("modal", False, "Modal app not deployed. Run: modal deploy app.modal_runner (one-time setup)"))
+                    elif "token" in error_lower or "auth" in error_lower or "unauthorized" in error_lower:
                         checks.append(("modal", False, "Modal authentication failed. Run: modal token set"))
+                    elif "not available" in error_lower:
+                        checks.append(("modal", False, "Modal package not installed. Run: pip install modal"))
                     else:
                         checks.append(("modal", False, f"Modal error: {error_msg}"))
                     res = None
