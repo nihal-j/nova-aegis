@@ -2,8 +2,6 @@
 
 Every file in the Aegis project, explained.
 
-## 🚨 **BEFORE PUSHING TO GITHUB - READ THIS**
-
 ### ✅ **SAFE TO PUSH** (All these are in `.gitignore`):
 - `.env` - Contains your API keys (gitignored)
 - `OPENROUTER_API_KEY.txt` - Contains OpenRouter API key (gitignored)
