@@ -482,9 +482,26 @@ with tab1:
             explanation = risk_card.get("explanation", "")
             if explanation:
                 st.markdown("#### 💡 Explanation")
-                # Check if OpenRouter was used (if we have the key, assume AI was attempted)
-                from app.secrets import read_openrouter_key
-                has_openrouter_key = read_openrouter_key() is not None
+                # Check if OpenRouter key exists (check file directly to avoid import issues)
+                import os
+                from pathlib import Path
+                # Try multiple possible paths (project root, current dir, parent dir)
+                possible_paths = [
+                    Path("OPENROUTER_API_KEY.txt"),  # Current directory
+                    Path("../OPENROUTER_API_KEY.txt"),  # Parent directory (if running from ui/)
+                    Path(__file__).parent.parent / "OPENROUTER_API_KEY.txt"  # Absolute path from script location
+                ]
+                has_openrouter_key = False
+                for key_path in possible_paths:
+                    if key_path.exists():
+                        try:
+                            key_content = key_path.read_text().strip()
+                            if key_content:
+                                has_openrouter_key = True
+                                break
+                        except Exception:
+                            pass
+                
                 if has_openrouter_key:
                     st.caption("🤖 AI-powered explanation (Claude 3.5 Sonnet) or plain-English summary")
                 else:
