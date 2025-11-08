@@ -12,6 +12,26 @@ import os
 # Find project root (where app/ directory is located)
 _PROJECT_ROOT = Path(__file__).parent.parent
 
+def read_airia_key() -> str | None:
+    """
+    Read Airia API key from AIRIA_API_KEY.txt.
+    
+    Returns:
+        API key string if file exists, None otherwise
+    """
+    possible_paths = [
+        _PROJECT_ROOT / "AIRIA_API_KEY.txt",
+        Path("AIRIA_API_KEY.txt"),
+    ]
+    
+    for p in possible_paths:
+        if p.exists():
+            try:
+                return p.read_text().strip()
+            except Exception:
+                continue
+    return None
+
 def read_openrouter_key() -> str | None:
     """
     Read OpenRouter API key from OPENROUTER_API_KEY.txt.

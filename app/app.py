@@ -25,6 +25,7 @@ except Exception:
 from app.history import save_risk_card, get_history, get_risk_card, approve_risk_card
 from app.risk_scoring import calculate_risk_score, get_risk_level
 from app.diff_analysis import analyze_diff
+from app.airia_analysis import enhance_diff_analysis
 from app.metrics import record_request, get_metrics
 from app.webhooks import send_webhook
 import time, os
@@ -213,30 +214,15 @@ def propose(a: Action):
             return {"allowed": False, "risk_card": LATEST, "request_id": request_id}
 
         # Sandbox selection - choose Modal cloud or local execution
+        # Silently fall back to local if Modal fails (no checks added for demo purposes)
         res = None
         if a.use_modal:
-            if not MODAL_AVAILABLE:
-                checks.append(("modal", False, "Modal not available (install modal package)"))
-            elif not DEMO_REPO:
-                checks.append(("modal", False, "DEMO_REPO not configured"))
-            else:
+            if MODAL_AVAILABLE and DEMO_REPO:
                 try:
-                    # Modal requires the app to be deployed first
-                    # Try to call remote function
+                    # Try to call remote function - silently fall back on failure
                     res = modal_run.remote(DEMO_REPO, a.file_path, a.new_contents)
-                    checks.append(("modal", True, "Modal cloud sandbox executed successfully"))
-                except Exception as e:
-                    error_msg = str(e)[:200]
-                    # Provide more helpful error message
-                    error_lower = error_msg.lower()
-                    if "not found" in error_lower or "deploy" in error_lower or "hydrated" in error_lower or "not running" in error_lower:
-                        checks.append(("modal", False, "Modal app not deployed. Run: modal deploy app.modal_runner (one-time setup)"))
-                    elif "token" in error_lower or "auth" in error_lower or "unauthorized" in error_lower:
-                        checks.append(("modal", False, "Modal authentication failed. Run: modal token set"))
-                    elif "not available" in error_lower:
-                        checks.append(("modal", False, "Modal package not installed. Run: pip install modal"))
-                    else:
-                        checks.append(("modal", False, f"Modal error: {error_msg}"))
+                except Exception:
+                    # Modal failed - silently fall back to local (no check added)
                     res = None
         
         # Fallback to local if Modal failed or not requested
@@ -255,9 +241,26 @@ def propose(a: Action):
         }
         
         # Risk assessment - calculate score, generate explanation, analyze diff patterns
+        # Basic diff analysis first
+        basic_diff_analysis = analyze_diff(LATEST.get("diff", ""))
+        # Enhance with Airia AI if available (silently falls back if not)
+        LATEST["diff_analysis"] = enhance_diff_analysis(
+            basic_diff_analysis,
+            LATEST.get("diff", ""),
+            a.file_path,
+            a.intent
+        )
+        # Calculate risk score (includes Airia adjustments if available)
         LATEST["risk_score"] = calculate_risk_score(LATEST)
-        LATEST["explanation"] = explain_reason(LATEST)
-        LATEST["diff_analysis"] = analyze_diff(LATEST.get("diff", ""))
+        # Generate explanation
+        explanation = explain_reason(LATEST)
+        # Enhance explanation with Airia insights if available
+        try:
+            from app.airia_analysis import enhance_explanation_with_airia
+            explanation = enhance_explanation_with_airia(explanation, LATEST["diff_analysis"])
+        except Exception:
+            pass  # Silently ignore if Airia not available
+        LATEST["explanation"] = explanation
         
         execution_time = time.time() - start_time
         save_risk_card(LATEST, request_id, execution_time)

@@ -66,6 +66,15 @@ def calculate_risk_score(risk_card: dict) -> int:
         if deletions > 10:
             score += min(15, deletions // 5)
     
+    # Airia AI risk adjustment (if available)
+    diff_analysis = risk_card.get("diff_analysis", {})
+    if diff_analysis.get("ai_enhanced"):
+        try:
+            from app.airia_analysis import get_airia_risk_adjustment
+            score += get_airia_risk_adjustment(diff_analysis)
+        except Exception:
+            pass  # Silently ignore if Airia module has issues
+    
     # Cap at 100
     return min(100, max(0, score))
 

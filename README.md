@@ -146,12 +146,18 @@ DEMO_REPO=https://github.com/your-org/your-repo.git
 AEGIS_WEBHOOK_URL=https://your-webhook-url.com
 ```
 
-### OpenRouter API Key (Optional)
+### API Keys (Optional)
 
-For AI-powered explanations:
-1. Create `OPENROUTER_API_KEY.txt` in the project root
-2. Add your OpenRouter API key (one line)
+**OpenRouter API Key** - For AI-powered explanations:
+1. Run: `python3 create_key_file.py`
+2. Or manually create `OPENROUTER_API_KEY.txt` and add your key
 3. If not provided, Aegis uses plain-English explanations
+
+**Airia API Key** - For enhanced AI code analysis:
+1. Run: `python3 create_airia_key.py`
+2. Or manually create `AIRIA_API_KEY.txt` and add your key
+3. Install Airia: `pip install airia`
+4. If not provided, Aegis uses basic pattern-matching analysis
 
 ---
 

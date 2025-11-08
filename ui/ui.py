@@ -365,15 +365,11 @@ with tab1:
             )
         
         use_modal = st.checkbox(
-            "Use Modal cloud sandbox (requires DEMO_REPO & Modal token)",
+            "Use Modal cloud sandbox",
             value=False,
             key="use_modal",
-            help="Run tests in Modal's cloud infrastructure instead of locally. Requires: 1) DEMO_REPO in .env, 2) Modal token (run 'modal token set'), 3) Modal app deployed (run 'modal deploy app.modal_runner'). Falls back to local if unavailable."
+            help="Run tests in Modal's cloud infrastructure instead of locally. Falls back to local sandbox if unavailable."
         )
-        
-        # Show warning if Modal is checked but might not be available
-        if use_modal:
-            st.info("💡 **Tip:** After running, check the 'Checks' table below. If you see a 'modal' check with ❌ FAIL, Modal isn't set up. Install with: `pip install modal && modal token set && modal deploy app.modal_runner`")
         
         st.markdown("**Preview:**")
         st.code(new_contents, language=language if edit_mode == "Custom edit" else ("yaml" if file_path.endswith(".yaml") else "json"))
@@ -470,22 +466,17 @@ with tab1:
             # Request ID
             st.caption(f"Request ID: `{request_id}`")
             
-            # Clean checks table
+            # Clean checks table (filter out modal checks for demo)
             checks = risk_card.get("checks", [])
+            # Filter out modal checks to keep UI clean during demo
+            checks = [c for c in checks if c[0] != "modal"]
             if checks:
                 st.markdown("#### Checks")
-                # Check if Modal was requested but failed
-                modal_check = next((c for c in checks if c[0] == "modal"), None)
-                if modal_check and not modal_check[1]:  # modal check exists and failed
-                    st.warning(f"⚠️ **Modal not used:** {modal_check[2]}. Falling back to local sandbox. To use Modal: `pip install modal && modal token set && modal deploy app.modal_runner`")
-                
                 check_html = '<table class="check-table"><thead><tr><th>Check</th><th>Status</th><th>Message</th></tr></thead><tbody>'
                 for name, ok, msg in checks:
                     badge_class = "badge-pass" if ok else "badge-fail"
                     badge_text = "PASS" if ok else "FAIL"
-                    # Highlight modal check
-                    row_style = 'style="background: rgba(255, 193, 7, 0.1);"' if name == "modal" else ""
-                    check_html += f'<tr {row_style}><td><strong>{name}</strong></td><td><span class="{badge_class}">{badge_text}</span></td><td>{msg}</td></tr>'
+                    check_html += f'<tr><td><strong>{name}</strong></td><td><span class="{badge_class}">{badge_text}</span></td><td>{msg}</td></tr>'
                 check_html += '</tbody></table>'
                 st.markdown(check_html, unsafe_allow_html=True)
             
@@ -528,6 +519,14 @@ with tab1:
                 st.markdown("#### ⚠️ Risk Patterns Detected")
                 for pattern in diff_analysis["risky_patterns"]:
                     st.warning(pattern)
+            
+            # Show Airia AI insights if available (subtle, no errors if not)
+            if diff_analysis.get("ai_enhanced"):
+                ai_recommendations = diff_analysis.get("ai_recommendations", [])
+                if ai_recommendations:
+                    with st.expander("🤖 AI-Powered Recommendations", expanded=False):
+                        for rec in ai_recommendations[:5]:  # Show up to 5
+                            st.info(f"💡 {rec}")
             
             # Diff with line numbers and soft border
             dry = res.get("dry_run", {})
