@@ -21,3 +21,10 @@ aegis_history.db
 .venv/
 venv/
 __pycache__/
+.env
+OPENROUTER_API_KEY.txt
+aegis_history.db
+*.db
+.venv/
+venv/
+__pycache__/
