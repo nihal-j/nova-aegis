@@ -85,22 +85,6 @@ def riskcard_history(limit: int = 50):
     """Get risk card history."""
     return {"history": get_history(limit)}
 
-@app.get("/riskcard/{request_id}")
-def riskcard_by_id(request_id: str):
-    """Get a specific risk card by request_id."""
-    card = get_risk_card(request_id)
-    if not card:
-        raise HTTPException(status_code=404, detail="Risk card not found")
-    return card
-
-@app.post("/riskcard/{request_id}/approve")
-def approve_card(request_id: str, approval: ApprovalRequest):
-    """Approve a blocked risk card."""
-    success = approve_risk_card(request_id, approval.approved_by)
-    if not success:
-        raise HTTPException(status_code=404, detail="Risk card not found")
-    return {"approved": True, "request_id": request_id, "approved_by": approval.approved_by}
-
 @app.get("/riskcard/html", response_class=HTMLResponse)
 def riskcard_html():
     """Return an HTML report of the risk card."""
@@ -174,6 +158,22 @@ def riskcard_html():
 </html>"""
     
     return html
+
+@app.get("/riskcard/{request_id}")
+def riskcard_by_id(request_id: str):
+    """Get a specific risk card by request_id."""
+    card = get_risk_card(request_id)
+    if not card:
+        raise HTTPException(status_code=404, detail="Risk card not found")
+    return card
+
+@app.post("/riskcard/{request_id}/approve")
+def approve_card(request_id: str, approval: ApprovalRequest):
+    """Approve a blocked risk card."""
+    success = approve_risk_card(request_id, approval.approved_by)
+    if not success:
+        raise HTTPException(status_code=404, detail="Risk card not found")
+    return {"approved": True, "request_id": request_id, "approved_by": approval.approved_by}
 
 @app.get("/metrics")
 def metrics():

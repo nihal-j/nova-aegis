@@ -5,7 +5,10 @@ import time
 from pathlib import Path
 from typing import List, Dict, Optional
 
-DB_PATH = Path("aegis_history.db")
+# Find project root (where app/ directory is located)
+_PROJECT_ROOT = Path(__file__).parent.parent
+# Use project root for database (consistent location)
+DB_PATH = _PROJECT_ROOT / "aegis_history.db"
 
 
 def init_db():
